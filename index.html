@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head
+         content must come *after* these tags -->
+    <title>Database Teatro</title>
+    <!-- Bootstrap -->
+    <script src="http://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <link href="./dbstyles.css" rel="stylesheet"> </head>
+<script>
+    
+    function extractLastIdfromHtml(string){
+        var lastId = string.match("w(.*)w");
+        return lastId[1];
+    }
+    //esegue query della ricerca degli utenti
+    function userSearch(searchedName) {
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                document.getElementById("usersTable").innerHTML = xmlhttp.responseText;
+            }
+        };
+        xmlhttp.open("GET", "./queryCognome.php?q=" + searchedName, true);
+        xmlhttp.send();
+    }
+    
+    //richiama query ricerca utenti da barra di ricerca
+    function buildSearch() {
+        var search = document.getElementById("textInput").value;
+        userSearch(search);
+        userInfo();
+    }
+    
+    
+    //insereisce le info e gli interessi dell'utente dato e riempe i form modifica utente e modifica interessi
+    function userInfo(id) {
+        $("body").css("cursor", "progress");
+        //debugger;
+        console.log(id);
+        xmlhttp2 = new XMLHttpRequest();
+        xmlhttp2.onreadystatechange = function () {
+            if (xmlhttp2.readyState == 4 && xmlhttp2.status == 200) {
+                document.getElementById("infoUserTable").innerHTML = xmlhttp2.responseText;
+                $("body").css("cursor", "default");
+            }
+        };
+        xmlhttp2.open("GET", "./queryUserInfo.php?p=" + id, true);
+        xmlhttp2.send();
+        
+        
+        xmlhttp3 = new XMLHttpRequest();
+        xmlhttp3.onreadystatechange = function () {
+            if (xmlhttp3.readyState == 4 && xmlhttp3.status == 200) {
+                document.getElementById("intrestsTable").innerHTML = xmlhttp3.responseText;
+            }
+        };
+        xmlhttp3.open("GET", "./queryIntrests.php?r=" + id, true);
+        xmlhttp3.send();
+        
+        
+        xmlhttp4 = new XMLHttpRequest();
+        xmlhttp4.onreadystatechange = function () {
+            if (xmlhttp4.readyState == 4 && xmlhttp4.status == 200) {
+                document.getElementById("fillModifica").innerHTML = xmlhttp4.responseText;
+            }
+        };
+        xmlhttp4.open("GET", "./fillUpdate.php?s=" + id, true);
+        xmlhttp4.send();
+        
+        
+        xmlhttp5 = new XMLHttpRequest();
+        xmlhttp5.onreadystatechange = function () {
+            if (xmlhttp5.readyState == 4 && xmlhttp5.status == 200) {
+                document.getElementById("fillIntrestsUpdate").innerHTML = xmlhttp5.responseText;
+            }
+        };
+        xmlhttp5.open("GET", "./fillIntrestsUpdate.php?t=" + id, true);
+        xmlhttp5.send();
+    }
+    
+    
+    
+    //tooltip
+    $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    
+    
+        //submit per creare un nuovo utente
+    function newUser() {
+        var cognome = document.getElementById("cognome").value;
+        var dataString =jQuery(document.getElementById("newUserForm")).serialize();
+
+        if (cognome == '') {
+            alert("Devi riempire almeno il cognome");
+        }
+        else {
+            // AJAX code to submit form.
+            $.ajax({
+                type: "POST"
+                , url: "newUser.php"
+                , data: dataString
+                , cache: false
+                , success: function (html) {
+                    alert(html);
+                    userSearch(cognome);
+                    var lastID=extractLastIdfromHtml(html);
+                    userInfo(lastID);
+                }
+            });
+        }
+        return false;
+    }
+    
+    
+    //modifica utente
+    function updateUser(id) {
+        var dataString =jQuery(document.getElementById("updateUserForm")).serialize()+ '&id=' + id;
+        
+        if (cognome1 == '') {
+            alert("Devi riempire almeno il cognome");
+        }
+        else {
+            // AJAX code to submit form.
+            $.ajax({
+                type: "POST"
+                , url: "updateUser.php"
+                , data: dataString
+                , cache: false
+                , success: function (html) {
+                    //userSearch('');
+                    userInfo(id);
+                    alert(html);
+                }
+            });
+        }
+        return false;
+    }
+    
+    
+    //elimina utente
+    function deleteUser(id) {
+        var ret = confirm("Vuoi davvero eliminare questo abbonato?");
+        if (ret == true) {
+            xmlhttp6 = new XMLHttpRequest();
+            xmlhttp6.onreadystatechange = function () {
+                if (xmlhttp6.readyState == 4 && xmlhttp6.status == 200) {
+                    alert(xmlhttp6.responseText);
+                    userSearch("");
+                    userInfo("");
+                }
+            }
+            xmlhttp6.open("GET", "./deleteUser.php?t=" + id, true);
+            xmlhttp6.send();
+        }
+    }
+    
+    //modifica gli interessi
+    function updateIntrests(id){
+        console.log(id);
+        var interestList = document.getElementById("interestList");
+        var items = interestList.getElementsByTagName("li");
+        var interestsArray=[];
+        for (var i = 0; i < items.length; ++i) {
+            if(items[i].children["0"].children["0"].children["0"].checked == true){
+                console.log("checked"+items[i].children["0"].attributes.idInteresse.value);
+                interestsArray.push(items[i].children["0"].attributes.idInteresse.value);
+            }
+        }
+        var dataString = 'arrayInteressi='+JSON.stringify(interestsArray) + '&id_utente=' + id;
+        console.log(dataString);
+        // AJAX code to submit form.
+        $.ajax({
+            type: "POST"
+            , url: "updateIntrests.php"
+            , data: dataString
+            , cache: false
+            , success: function (html) {
+                userInfo(id);
+                if(html!=""){
+                    alert(html);
+                }
+            }
+        });
+        return false;
+    }
+    
+    //svuota il modal aggiungi
+    function emptyModal(){
+        document.getElementById("newUserForm").reset();
+    }
+    
+    
+    
+    
+    //fa apparire il modal di selezione interessi per export
+    function fillExportSelect(){
+        xmlhttp6 = new XMLHttpRequest();
+        xmlhttp6.onreadystatechange = function () {
+            if (xmlhttp6.readyState == 4 && xmlhttp6.status == 200) {
+                document.getElementById("fillExportSelect").innerHTML = xmlhttp6.responseText;
+            }
+        };
+        xmlhttp6.open("GET", "./fillExportSelect.php", true);
+        xmlhttp6.send();   
+    }
+    
+    //esporta per interessi selezionati
+    function exportQuery(){
+       
+        var interestExportList = document.getElementById("interestExportList");
+        var items = interestExportList.getElementsByTagName("li");
+        var interestsExportArray=[];
+        for (var i = 0; i < items.length; ++i) {
+            if(items[i].children["0"].children["0"].children["0"].checked == true){
+                console.log("checked"+items[i].children["0"].attributes.idInteresse.value);
+                interestsExportArray.push(items[i].children["0"].attributes.idInteresse.value);
+            }
+        }
+        
+        
+       
+        var dataString0 =JSON.stringify(interestsExportArray);
+        dataString=dataString0.replace(/\"/g,"");
+        console.log(dataString);
+        
+        
+          var url = './export.php';
+                var form = $('<form action="' + url + '" method="post" style="display: none;">' +
+                    '<input type="text" name="data" value="' + dataString + '" />' +
+                    '</form>');
+                $('body').append(form);
+                $(form).submit();
+            console.log(form);
+        
+           
+        }
+    
+        function backup(){
+            
+            xmlhttp2 = new XMLHttpRequest();
+            xmlhttp2.open("GET", "./backupUtenti.php", true);
+            xmlhttp2.onreadystatechange = function () {
+                if (xmlhttp2.readyState == 4 && xmlhttp2.status == 200) {
+                }
+            };
+            xmlhttp2.send();
+            
+        }
+    
+</script>
+
+    
+    
+<body onload="userSearch('')">
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class=col-xs-4>  
+            <div class="row">
+                <div class=col-xs-11>
+                    
+                    <div class="input-group" id="search">
+                        <input id="textInput" type="text" class="form-control" placeholder="Cerca" onchange="buildSearch()"> <span class="input-group-btn">
+                      <button class="btn btn-default" type="button" onclick="buildSearch();"><i class="fa fa-search" aria-hidden="true"></i></button>
+                </span> </div>
+                </div>
+                <div class="col-xs-1">
+                    <div id="add-button">
+                        <button type="button" id="addButton" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#nuovoAbbonato" data-placement="right" title="Aggiungi abbonato" data-target="tooltip"> <i class="fa fa-plus" aria-hidden="true"></i> </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <h2 id="title">Database Abbonati</h2>
+        </div>
+        <div class="col-xs-2">
+            <button id="exportButtton" class="btn btn-primary" type="button" onclick="fillExportSelect()" data-toggle="modal" data-target="#modExport">
+                    <h4>Esporta query corrente</h4></button>
+        </div>
+            <div class="col-xs-2">
+                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modBackup">Backup</button>
+            </div>
+    </nav>
+    <div class="container body-content">
+        <div class="row row-content">
+            <div class="col-xs-5">
+                <div id="usersTable">
+                    <p>Tabella abbonati</p>
+                </div>
+            </div>
+            <div class="col-xs-7">
+                <div class="row row-content2" style="position:fixed">
+                    <div class="col-xs-6">
+                        <div class="well table-well">
+                            <div class="row">
+                                <div class=col-xs-10>
+                                    <div id="infoUserTable">
+                                        <h4>Clicca su un abbonato per vedere le sue info</h4> </div>
+                                </div>
+                                <div class="col-xs-2">
+                                    <button class="btn btn-default" type="button" data-toggle="modal" data-target="#modAbbonato" data-placement="right" data-target="tooltip" title="Modifica abbonato"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="well table-well">
+                            <div class="row">
+                                <div class=col-xs-10>
+                                    <div id="intrestsTable">
+                                        <h4>Clicca su un abbonato per vedere le sue info</h4> </div>
+                                </div>
+                                <div class="col-xs-2">
+                                    <button class="btn btn-default" type="button" data-toggle="modal" data-target="#modIntrests" data-placement="right" data-target="tooltip" title="Modifica interessi"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div id="nuovoAbbonato" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Nuovo Abbonato </h4> </div>
+                <div class="modal-body">
+                    <form  id="newUserForm">
+                        <div class="form-group">
+                            <label for="cognome" class="control-label">Cognome</label>
+                            <input class="form-control" type="text" id="cognome" name="cognome">
+                            <label for="nome" class="control-label">Nome</label>
+                            <input class="form-control" type="text" id="nome" name="nome"> </div>
+                        <div class="form-group">
+                            <label for="residenza" class="control-label">Residenza</label>
+                            <input class="form-control" type="text" id="indirizzo" placeholder="Indirizzo" name="indirizzo">
+                            <input class="form-control" type="text" id="citta" placeholder="Città" name="citta">
+                            <input class="form-control" type="text" id="CAP" placeholder="CAP" name="CAP"> </div>
+                        <div class="form-group">
+                            <label for="recapito" class="control-label">Recapito</label>
+                            <div class="has-feedback">
+                                <input class="form-control" type="text" id="email" placeholder="Email" name="email"> <span class="glyphicon glyphicon-envelope form-control-feedback"></span> </div>
+                            <div class="has-feedback">
+                                <input class="form-control" type="text" id="telefono" placeholder="Numero Fisso" name="telefono"> <span class="glyphicon glyphicon-phone-alt form-control-feedback"></span> </div>
+                            <div class="has-feedback">
+                                <input class="form-control" type="text" id="cellulare" value="+39" placeholder="Numero Cell." name="cellulare"><span class="glyphicon glyphicon-phone form-control-feedback"></span> </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="idFam" class="control-label">ID Familiare</label>
+                            <input class="form-control" type="text" id="id_coabita" name="id_coabita"> </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" onclick="newUser(), emptyModal()" data-dismiss="modal">Aggiungi</button>
+                            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Annulla</button>
+                        </div>
+                        <div class="alert alert-warning alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Attenzione!</strong> </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modBackup" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="btn-group btn-group-lg" role="group">
+                        <a href="./backupUtenti.php" class="btn btn-warning" role="button">Backup Utenti</a>
+                        <a href="./backupJoin.php" class="btn btn-warning" role="button">Backup tabella Join</a>
+                        <a href="./backupInteressi.php" class="btn btn-warning" role="button">Backup Interessi</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modAbbonato" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modifica Abbonato </h4> </div>
+                <div id="fillModifica" class="modal-body"> </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div id="modIntrests" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Modifica interessi </h4>
+                </div>
+                
+                <div id="fillIntrestsUpdate" class="modal-body"> </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modExport" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scegli quali anni esportare</h4>
+                </div>
+                
+                <div id="fillExportSelect" class="modal-body"> </div>
+            </div>
+        </div>
+    </div>
+</body>
