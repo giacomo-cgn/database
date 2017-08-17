@@ -1,5 +1,6 @@
 <?php
-$con = mysqli_connect('vcg.isti.cnr.it','cignoni','passwordfaite','archive');
+include './includes/config.php';
+$con = mysqli_connect('vcg.isti.cnr.it','cignoni',$dbpassword,'archive');
 if (!$con) {
     die('Could not connect: ' . mysqli_error($con));
 }

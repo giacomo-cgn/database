@@ -1,4 +1,5 @@
 <?php
+include './includes/config.php';
 function searchIntrestPartialList($partialInterest, $interest){
    mysqli_data_seek ($partialInterest , 0 );
     while ($rowPartial = mysqli_fetch_array($partialInterest)){
@@ -11,7 +12,7 @@ function searchIntrestPartialList($partialInterest, $interest){
     
     
 $t = intval($_GET['t']); 
-$con = mysqli_connect('vcg.isti.cnr.it','cignoni','passwordfaite','archive');
+$con = mysqli_connect('vcg.isti.cnr.it','cignoni',$dbpassword,'archive');
 if (!$con) {
     die('Could not connect: ' . mysqli_error($con));
 }

@@ -1,11 +1,12 @@
  <?php
+	include './includes/config.php';
     $today = getdate();
     $mday = strval($today['mday']);
     $month = strval($today['mon']);
     $year = strval($today['year']);
     header('Content-Disposition: attachment; filename="backupInteressi'.$year.$month.$mday.'.csv"');
     
-   $con = mysqli_connect('vcg.isti.cnr.it','cignoni','passwordfaite','archive');
+   $con = mysqli_connect('vcg.isti.cnr.it','cignoni',$dbpassword,'archive');
     if (!$con) {
         die('Could not connect: ' . mysqli_error($con));
     }

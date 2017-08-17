@@ -1,6 +1,7 @@
 <?php
+include './includes/config.php';
 $s = intval($_GET['s']); 
-$con = mysqli_connect('vcg.isti.cnr.it','cignoni','passwordfaite','archive');
+$con = mysqli_connect('vcg.isti.cnr.it','cignoni',$dbpassword,'archive');
 if (!$con) {
     die('Could not connect: ' . mysqli_error($con));
 }
@@ -51,7 +52,7 @@ echo "<form id=\"updateUserForm\">
                         </div>
                         <div class=\"alert alert-warning alert-dismissible\" role=\"alert\">
                             <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>
-                            <strong>Attenzione!</strong>
+                            <strong>Attenzione!</strong><br><u>Non inserire apostrofi o virgolette</u>
                         </div>
                     </form>";
 mysqli_close($con);
